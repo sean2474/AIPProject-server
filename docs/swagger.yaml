@@ -1,0 +1,1262 @@
+basePath: /
+definitions:
+  databaseTypes.FoodMenu:
+    properties:
+      breakfast:
+        example: Omelette
+        type: string
+      date:
+        example: "2022-01-01"
+        type: string
+      dinner:
+        example: Grilled chicken
+        type: string
+      id:
+        example: 1
+        type: integer
+      lunch:
+        example: Pasta
+        type: string
+    type: object
+  databaseTypes.LostAndFound:
+    properties:
+      date_found:
+        example: "2022-01-01T12:00:00Z"
+        type: string
+      description:
+        type: string
+      id:
+        example: 1
+        type: integer
+      image_file:
+        items:
+          type: integer
+        type: array
+      image_url:
+        type: string
+      item_name:
+        example: Backpack
+        type: string
+      location_found:
+        example: Library
+        type: string
+      status:
+        example: 1
+        type: integer
+      submitter_id:
+        example: 2
+        type: integer
+    type: object
+  databaseTypes.SchoolStore:
+    properties:
+      Category:
+        example: 2
+        type: integer
+      Date_Added:
+        example: "2022-01-01T12:00:00Z"
+        type: string
+      Description:
+        type: string
+      ID:
+        example: 1
+        type: integer
+      Price:
+        example: 49.99
+        type: number
+      Product_Name:
+        example: Backpack
+        type: string
+      Stock:
+        example: 10
+        type: integer
+      image_file:
+        items:
+          type: integer
+        type: array
+    type: object
+  databaseTypes.SportsGame:
+    properties:
+      category:
+        example: 1
+        type: integer
+      coach_comment:
+        type: string
+      game_location:
+        example: Stadium
+        type: string
+      game_schedule:
+        example: "2022-01-01T12:00:00Z"
+        type: string
+      home_or_away:
+        example: 1
+        type: integer
+      id:
+        example: 1
+        type: integer
+      match_result:
+        type: string
+      opponent_school:
+        example: Central High School
+        type: string
+      sport_name:
+        example: Football
+        type: string
+    type: object
+  databaseTypes.SportsInfo:
+    properties:
+      category:
+        example: 1
+        type: integer
+      coach_contact:
+        example: john.smith@example.com
+        type: string
+      coach_name:
+        example: John Smith
+        type: string
+      id:
+        example: 1
+        type: integer
+      roster:
+        type: string
+      season:
+        example: 2022
+        type: integer
+      sport_name:
+        example: Basketball
+        type: string
+    type: object
+  databaseTypes.User:
+    properties:
+      email:
+        example: johndoe@example.com
+        type: string
+      first_name:
+        example: John
+        type: string
+      id:
+        example: 1
+        type: integer
+      last_name:
+        example: Doe
+        type: string
+      rfid_token:
+        example: RFID_TOKEN_12345
+        type: string
+      user_type:
+        example: 2
+        type: integer
+    type: object
+  lostAndFound.deleteResponse:
+    properties:
+      status:
+        type: string
+    type: object
+  restTypes.AllMenuResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/databaseTypes.FoodMenu'
+        type: array
+    type: object
+  restTypes.DeleteResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  restTypes.ErrorResponse:
+    properties:
+      code:
+        description: |-
+          HTTP status code of the error response.
+
+          Example: 400
+
+          Required: true
+        type: integer
+      message:
+        description: |-
+          Error message.
+
+          Example: Invalid request
+
+          Required: true
+        type: string
+    type: object
+  restTypes.LoginRequest:
+    properties:
+      password:
+        description: |-
+          User's password.
+
+          Example: mypassword123
+
+          Required: true
+        example: password1
+        type: string
+      username:
+        description: |-
+          User's email or username.
+
+          Required: true
+        example: johnsmith@example.com
+        type: string
+    type: object
+  restTypes.LoginResponse:
+    properties:
+      message:
+        description: |-
+          Message indicating the result of the login attempt.
+
+          Example: Login successful
+
+          Required: true
+        example: Login successful
+        type: string
+      status:
+        description: |-
+          Status of the login attempt.
+
+          Example: success
+
+          Required: true
+        example: success
+        type: string
+      token:
+        description: |-
+          JWT token to be used for authentication in future requests.
+
+          Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+          Required: true
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+        type: string
+      user_data:
+        allOf:
+        - $ref: '#/definitions/databaseTypes.User'
+        description: |-
+          User data associated with the logged-in user.
+
+          Required: false
+          @name User
+          @in body
+          @description User data associated with the logged-in user.
+
+          Example: {"id":123,"first_name":"John","last_name":"Doe","email":"user@example.com","user_type":"student"}
+    type: object
+  restTypes.LostAndFoundErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  restTypes.LostAndFoundPostResponse:
+    properties:
+      id:
+        type: integer
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  restTypes.SchoolStorePostResponse:
+    properties:
+      id:
+        type: integer
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  restTypes.SchoolStoreResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/databaseTypes.SchoolStore'
+        type: array
+    type: object
+  restTypes.SportsDataList:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/databaseTypes.SportsInfo'
+        type: array
+    type: object
+  restTypes.SportsGameDataList:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/databaseTypes.SportsGame'
+        type: array
+    type: object
+info:
+  contact:
+    name: Senya
+  description: Simple swagger implementation in Go HTTP
+  title: Go Rest API with Swagger for school system
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login to the system and receive an authentication token.
+      parameters:
+      - description: User login information
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/restTypes.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.LoginResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/restTypes.ErrorResponse'
+      summary: Authenticate user
+      tags:
+      - Authentication
+  /auth/testToken:
+    get:
+      consumes:
+      - application/json
+      description: Greets the user with "Hello, {userName}!" if he's authorized
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hello, {userName}!
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/restTypes.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/restTypes.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Greet the user if he's authorized
+      tags:
+      - Authentication
+    post:
+      consumes:
+      - application/json
+      description: Greets the user with "Hello, {userName}!" if he's authorized
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hello, {userName}!
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/restTypes.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/restTypes.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Greet the user if he's authorized
+      tags:
+      - Authentication
+  /data/daily-schedule/:
+    get:
+      consumes:
+      - '*/*'
+      parameters:
+      - description: The date for which to retrieve the daily schedule in the format
+          'YYYY-MM-DD'. If not provided, the current date is used.
+        in: query
+        name: date
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get the daily schedule HTML template for the specified date or the
+        current date
+      tags:
+      - DailySchedule
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads the daily schedule image for the current date to the database
+      parameters:
+      - description: The daily schedule image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/restTypes.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Upload the daily schedule image for the current date
+      tags:
+      - DailySchedule
+  /data/daily-schedule/{date}:
+    delete:
+      description: Deletes the daily schedule for a specific date from the database
+      parameters:
+      - description: The date of the daily schedule to delete (in YYYY-MM-DD format)
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Delete the daily schedule for a specific date
+      tags:
+      - DailySchedule
+    put:
+      description: Updates the daily schedule image for a specific date in the database
+      parameters:
+      - description: The date of the daily schedule to update (in YYYY-MM-DD format)
+        in: path
+        name: date
+        required: true
+        type: string
+      - description: 'The updated image file for the daily schedule (limit: 32 MB)'
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Update the daily schedule for a specific date
+      tags:
+      - DailySchedule
+  /data/daily-schedule/image:
+    delete:
+      description: Deletes the daily schedule image for a specific date from the database
+      parameters:
+      - description: The date for which to delete the daily schedule image in the
+          format 'YYYY-MM-DD'. If not provided, the current date is used.
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      tags:
+      - DailySchedule
+    get:
+      consumes:
+      - '*/*'
+      parameters:
+      - description: The date for which to retrieve the daily schedule image in the
+          format 'YYYY-MM-DD'. If not provided, the current date is used.
+        in: query
+        name: date
+        type: string
+      produces:
+      - image/*
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get the image file for the daily schedule of the specified date or
+        the current date
+      tags:
+      - DailySchedule
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads the daily schedule image for the provided date to the database
+      parameters:
+      - description: The daily schedule image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: 'The date for which the image is uploaded (format: 2006-01-02)'
+        in: formData
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/restTypes.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      tags:
+      - DailySchedule
+  /data/food-menu/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the breakfast, lunch, and dinner menu for the current
+        date from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/databaseTypes.FoodMenu'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get the food menu for the current date
+      tags:
+      - FoodMenu
+    post:
+      consumes:
+      - application/json
+      description: Add a new food menu to the database
+      operationId: addFoodMenu
+      parameters:
+      - description: Food menu to add
+        in: body
+        name: foodMenu
+        required: true
+        schema:
+          $ref: '#/definitions/databaseTypes.FoodMenu'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Add a food menu
+      tags:
+      - FoodMenu
+  /data/food-menu/{date}:
+    delete:
+      description: Delete a food menu from the database for a given date
+      operationId: DeleteFoodMenu
+      parameters:
+      - description: The date of the food menu to delete
+        in: path
+        name: date
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.DeleteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Delete a food menu
+      tags:
+      - FoodMenu
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the breakfast, lunch, and dinner menu for a specific
+        date from the database
+      parameters:
+      - description: The date of the food menu (YYYY-MM-DD)
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/databaseTypes.FoodMenu'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - FoodMenu
+  /data/food-menu/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update the food menu with the specified ID
+      parameters:
+      - description: ID of the food menu to update
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New values for the food menu
+        in: body
+        name: foodMenu
+        required: true
+        schema:
+          $ref: '#/definitions/databaseTypes.FoodMenu'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/restTypes.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/restTypes.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/restTypes.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update a food menu
+      tags:
+      - FoodMenu
+  /data/food-menu/all:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all the breakfast, lunch, and dinner menus from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.AllMenuResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - FoodMenu
+  /data/games/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves data about sports games and their results.
+      operationId: get-sports-game-data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of sports game data
+          schema:
+            $ref: '#/definitions/restTypes.SportsGameDataList'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get sports game data
+      tags:
+      - SportsData
+  /data/lost-and-found/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all lost and found items from the database
+        and returns them as a JSON array in the response body.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/databaseTypes.LostAndFound'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all lost and found items
+      tags:
+      - LostAndFound
+    post:
+      consumes:
+      - multipart/form-data
+      description: Adds a lost and found item to the database and uploads an image
+        file
+      parameters:
+      - description: Name of the lost/found item
+        in: formData
+        name: item_name
+        required: true
+        type: string
+      - description: Description of the lost/found item
+        in: formData
+        name: description
+        type: string
+      - description: Date the item was found
+        in: formData
+        name: date_found
+        required: true
+        type: string
+      - description: Location where the item was found
+        in: formData
+        name: location_found
+        required: true
+        type: string
+      - description: Status of the item (lost or found)
+        in: formData
+        name: status
+        required: true
+        type: string
+      - description: Image of the lost/found item
+        in: formData
+        name: image_file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/restTypes.LostAndFoundPostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/restTypes.LostAndFoundErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/restTypes.LostAndFoundErrorResponse'
+      security:
+      - Bearer: []
+      summary: Add a lost and found item
+      tags:
+      - LostAndFound
+  /data/lost-and-found/image/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update an existing lost and found item in the database with the
+        specified ID
+      operationId: update-lost-and-found-item
+      parameters:
+      - description: Lost and found item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Item name
+        in: formData
+        name: item_name
+        type: string
+      - description: Item description
+        in: formData
+        name: description
+        type: string
+      - description: Date the item was found
+        in: formData
+        name: date_found
+        type: string
+      - description: Location where the item was found
+        in: formData
+        name: location_found
+        type: string
+      - description: Status of the lost and found item
+        in: formData
+        name: status
+        type: string
+      - description: Image file of the lost and found item
+        in: formData
+        name: image_file
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.LostAndFoundErrorResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/restTypes.LostAndFoundErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/restTypes.LostAndFoundErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update a lost and found item
+      tags:
+      - LostAndFound
+  /data/lost-and-found/image/{imageID}:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the image file for a lost and found item with the specified
+        ID from the database and returns it as a JPEG image in the response body.
+      parameters:
+      - description: The ID of the lost and found item to retrieve the image file
+          for.
+        in: path
+        name: imageID
+        required: true
+        type: string
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: The image file for the specified lost and found item.
+          schema:
+            type: string
+        "404":
+          description: The specified lost and found item ID was not found in the database.
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get the image file for a lost and found item by ID.
+      tags:
+      - LostAndFound
+  /data/school-store/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of items from the School Store database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.SchoolStoreResponse'
+        "400":
+          description: Invalid request parameters
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get a list of items from the School Store
+      tags:
+      - School Store
+    post:
+      consumes:
+      - multipart/form-data
+      description: Adds a new item to the School Store database
+      parameters:
+      - description: Name of the item to add
+        in: formData
+        name: item_name
+        required: true
+        type: string
+      - description: Description of the item to add
+        in: formData
+        name: description
+        required: true
+        type: string
+      - description: Price of the item to add
+        in: formData
+        name: price
+        required: true
+        type: number
+      - description: Category of the item to add
+        in: formData
+        name: category
+        required: true
+        type: string
+      - description: Image file of the item to add
+        in: formData
+        name: image_file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.ErrorResponse'
+        "400":
+          description: Invalid request parameters
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Add an item to the School Store
+      tags:
+      - School Store
+  /data/school-store/{item_id}:
+    delete:
+      description: Deletes an item from the School Store database
+      parameters:
+      - description: ID of the item to delete
+        in: path
+        name: item_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.ErrorResponse'
+        "400":
+          description: Invalid request parameters
+          schema:
+            type: string
+        "404":
+          description: Item not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Delete an item from the School Store
+      tags:
+      - School Store
+    put:
+      consumes:
+      - multipart/form-data
+      description: Updates an existing item in the School Store database
+      parameters:
+      - description: ID of the item to update
+        in: path
+        name: item_id
+        required: true
+        type: integer
+      - description: New name of the item
+        in: formData
+        name: item_name
+        type: string
+      - description: New description of the item
+        in: formData
+        name: description
+        type: string
+      - description: New price of the item
+        in: formData
+        name: price
+        type: number
+      - description: New category of the item
+        in: formData
+        name: category
+        type: string
+      - description: New image file of the item
+        in: formData
+        name: image_file
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.SchoolStorePostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Update an item in the School Store
+      tags:
+      - School Store
+  /data/school-store/image/{item_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an image for a specified item from the School Store database
+      parameters:
+      - description: ID of the item to retrieve the image for
+        in: path
+        name: item_id
+        required: true
+        type: integer
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Invalid request parameters
+          schema:
+            type: string
+        "404":
+          description: Item not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get an image for an item from the School Store
+      tags:
+      - School Store
+  /data/sports/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves data about sports teams and their coaches.
+      operationId: get-sports-data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of sports data
+          schema:
+            $ref: '#/definitions/restTypes.SportsDataList'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get sports data
+      tags:
+      - SportsData
+  /lost-and-found/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a lost and found item from the database
+      operationId: delete-lost-and-found-item
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/lostAndFound.deleteResponse'
+        "400":
+          description: Invalid item ID
+          schema:
+            type: string
+        "404":
+          description: Item not found
+          schema:
+            type: string
+        "405":
+          description: Method not allowed
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete a lost and found item
+      tags:
+      - LostAndFound
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
