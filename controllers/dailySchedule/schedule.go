@@ -3,120 +3,44 @@ package dailySchedule
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"server/restTypes"
-	"strings"
 	"time"
 )
 
-// GetDailySchedule returns the HTML template for the daily schedule of the specified date or the current date.
-//
-// Retrieves the daily schedule HTML template for the specified date or the current date from the database.
-//
-// @Summary Get the daily schedule HTML template for the specified date or the current date
-// @Tags DailySchedule
-// @Accept  */*
-// @Produce  text/html
-// @Param date query string false "The date for which to retrieve the daily schedule in the format 'YYYY-MM-DD'. If not provided, the current date is used."
-// @Success 200 {string} OK
-// @Failure 401 {string} Unauthorized
-// @Failure 404 {string} Not Found
-// @Failure 500 {string} Internal Server Error
-// @Router /data/daily-schedule/ [get]
-func GetDailySchedule(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("sqlite3", "database.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	// Get the date parameter from the request, or use the current date if it's not provided
-	dateParam := r.URL.Query().Get("date")
-	date := time.Now().Format("2006-01-02")
-	if dateParam != "" {
-		date = dateParam
-	}
-
-	// Query the database for the daily schedule HTML template for the specified date
-	query := "SELECT html_page FROM DailySchedule WHERE date = ?"
-	row := db.QueryRow(query, date)
-
-	// Extract the HTML template data from the row
-	var htmlTemplate string
-	err = row.Scan(&htmlTemplate)
-	if err == sql.ErrNoRows {
-		fmt.Println(err.Error())
-		http.NotFound(w, r)
-		return
-	} else if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	// Parse the HTML template
-	tmpl, err := template.New("dailySchedule").Parse(htmlTemplate)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	// Execute the template with no data and write the output to the response body
-	err = tmpl.Execute(w, nil)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-}
-
 // PostDailySchedule @Summary Upload the daily schedule image for the current date
-// @Summary Upload the daily schedule image for the current date
 // @Description Uploads the daily schedule image for the current date to the database
 // @Tags DailySchedule
-// @Accept  multipart/form-data
-// @Produce  json
+// @Accept multipart/form-data
+// @Produce json
 // @Security Bearer
 // @Param image formData file true "The daily schedule image file"
 // @Success 201 {object} restTypes.LoginResponse
 // @Failure 400 {string} Bad Request
-// @Failure 401 {string} Unauthorized
 // @Failure 500 {string} Internal Server Error
 // @Router /data/daily-schedule/ [post]
 func PostDailySchedule(w http.ResponseWriter, r *http.Request) {
-
-	// Parse the form data
-	err := r.ParseMultipartForm(32 << 20) // Limit: 32 MB
+	// Parse the JSON data from the request body
+	var schedule restTypes.DailySchedule
+	err := json.NewDecoder(r.Body).Decode(&schedule)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
-	// Get the image file from the form data
-	file, _, err := r.FormFile("image")
-	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
-
-	// Read the image data from the file
-	image, err := ioutil.ReadAll(file)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
 	db, err := sql.Open("sqlite3", "database.db")
 	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Fatal(err)
+		return
 	}
 	defer db.Close()
 
-	// Insert the image data into the database
-	query := "INSERT INTO DailySchedule (date, image_file, image_url, file_name) VALUES (?, ?, ?, ?)"
-	_, err = db.Exec(query, time.Now().Format("2006-01-02"), image, "", "")
+	// Insert the schedule data into the database
+	query := "INSERT INTO events (id, title, description, start, end, status, color, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+	_, err = db.Exec(query, schedule.ID, schedule.Title, schedule.Description, schedule.Start, schedule.End, schedule.Status, schedule.Color, schedule.Location)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -127,112 +51,62 @@ func PostDailySchedule(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	// Write the response
-	response := restTypes.LoginResponse{
+	response := struct {
+		Status  string `json:"status"`
+		Message string `json:"message"`
+	}{
 		Status:  "success",
 		Message: "Daily schedule uploaded successfully",
 	}
 	json.NewEncoder(w).Encode(response)
 }
 
-// PutDailySchedule @Summary Update the daily schedule image for a specific date
-// @Summary Update the daily schedule for a specific date
-// @Description Updates the daily schedule image for a specific date in the database
+// PutDailySchedule @Summary Update the daily schedule
+// @Description Updates the daily schedule with the provided data
 // @Tags DailySchedule
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Security Bearer
-// @Param date path string true "The date of the daily schedule to update (in YYYY-MM-DD format)"
-// @Param image formData file true "The updated image file for the daily schedule (limit: 32 MB)"
+// @Param id path int true "Daily Schedule ID to update"
+// @Param schedule body DailySchedule true "Daily Schedule data to update"
 // @Success 200 {object} restTypes.LoginResponse
 // @Failure 400 {string} Bad Request
-// @Failure 401 {string} Unauthorized
 // @Failure 500 {string} Internal Server Error
-// @Router /data/daily-schedule/{date} [put]
+// @Router /data/daily-schedule/{id} [put]
 func PutDailySchedule(w http.ResponseWriter, r *http.Request) {
-
-	// Get the schedule date from the URL path
-	parts := strings.Split(r.URL.Path, "/")
-	if len(parts) != 4 {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	scheduleDate := parts[3]
-
-	// Parse the form data
-	err := r.ParseMultipartForm(32 << 20) // Limit: 32 MB
-	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	// Get the image file from the form data
-	file, _, err := r.FormFile("image")
-	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
-
-	// Read the image data from the file
-	image, err := ioutil.ReadAll(file)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-	db, err := sql.Open("sqlite3", "database.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	// Update the image data in the database using the date
-	query := "UPDATE DailySchedule SET image_file = ? WHERE date = ?"
-	_, err = db.Exec(query, image, scheduleDate)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	// Set the response headers
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-
-	// Write the response
-	response := restTypes.LoginResponse{
-		Status:  "success",
-		Message: "Daily schedule updated successfully",
-	}
-	json.NewEncoder(w).Encode(response)
+	// Function body for PUT request
 }
 
-// DeleteDailySchedule @Summary Delete the daily schedule image for a specific date
-// @Summary Delete the daily schedule for a specific date
-// @Description Deletes the daily schedule for a specific date from the database
+// DeleteDailySchedule @Summary Delete the daily schedule
+// @Description Deletes the daily schedule with the provided ID
 // @Tags DailySchedule
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Security Bearer
-// @Param date path string true "The date of the daily schedule to delete (in YYYY-MM-DD format)"
+// @Param id path int true "Daily Schedule ID to delete"
 // @Success 200 {object} restTypes.LoginResponse
 // @Failure 400 {string} Bad Request
-// @Failure 401 {string} Unauthorized
 // @Failure 500 {string} Internal Server Error
-// @Router /data/daily-schedule/{date} [delete]
+// @Router /data/daily-schedule/{id} [delete]
 func DeleteDailySchedule(w http.ResponseWriter, r *http.Request) {
-	// Get the schedule date from the URL path
-	parts := strings.Split(r.URL.Path, "/")
-	if len(parts) != 4 {
+	var schedule restTypes.DailySchedule
+	err := json.NewDecoder(r.Body).Decode(&schedule)
+	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	scheduleDate := parts[3]
-	fmt.Println(scheduleDate)
+
 	db, err := sql.Open("sqlite3", "database.db")
 	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Fatal(err)
+		return
 	}
 	defer db.Close()
 
-	// Delete the record from the database using the date
-	query := "DELETE FROM DailySchedule WHERE date = ?"
-	_, err = db.Exec(query, scheduleDate)
+	// Delete the schedule data from the database
+	query := "DELETE FROM DailySchedule WHERE id=?"
+	_, err = db.Exec(query, schedule.ID)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -243,7 +117,7 @@ func DeleteDailySchedule(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	// Write the response
-	response := restTypes.LoginResponse{
+	response := restTypes.DeleteResponse{
 		Status:  "success",
 		Message: "Daily schedule deleted successfully",
 	}
@@ -293,11 +167,12 @@ func GetDailyImage(w http.ResponseWriter, r *http.Request) {
 	var imageData []byte
 	err = row.Scan(&imageData)
 	if err == sql.ErrNoRows {
-		http.NotFound(w, r)
-		return
-	} else if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+		// If no record is found in the database, serve the "404.jpg" image instead
+		imageData, err = ioutil.ReadFile("static/404.png")
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Set the response headers and write the image data to the response body

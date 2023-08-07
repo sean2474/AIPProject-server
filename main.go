@@ -1,13 +1,14 @@
 package main
 
 import (
+	"github.com/rs/cors" // Import the cors package
 	httpSwagger "github.com/swaggo/http-swagger"
 	"net/http"
 	"server/controllers"
 	_ "server/docs"
-	_ "strings"
 )
 
+// Rest of your code...
 // @title Go Rest API with Swagger for school system
 // @version 1.0
 // @description Simple swagger implementation in Go HTTP
@@ -18,16 +19,26 @@ import (
 // @name Authorization
 // @description Type "Bearer" followed by a space and JWT token.
 func main() {
-	http.HandleFunc("/swagger/", httpSwagger.WrapHandler)
-	http.HandleFunc("/auth/login", controllers.LoginHandler)
-	http.HandleFunc("/auth/testToken", controllers.TestToken)
-	http.HandleFunc("/data/food-menu/", controllers.FoodMenuByHandler)
-	http.HandleFunc("/data/daily-schedule/image", controllers.ScheduleImageHandler)
-	http.HandleFunc("/data/daily-schedule/", controllers.ScheduleHandler)
-	http.HandleFunc("/data/lost-and-found/", controllers.LostAndFoundHandler)
-	http.HandleFunc("/data/sports/", controllers.SportsHandler)
-	http.HandleFunc("/data/games/", controllers.GamesHandler)
-	http.HandleFunc("/data/school-store/", controllers.SchoolStoreHandler)
+	// Create a new cors handler with permissive options (allowing all origins)
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Allow all origins, you can restrict this to specific origins if needed
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowCredentials: true,
+	})
+
+	// Apply the cors handler to your existing handlers
+	http.Handle("/swagger/", corsHandler.Handler(httpSwagger.WrapHandler))
+	http.Handle("/auth/login", corsHandler.Handler(http.HandlerFunc(controllers.LoginHandler)))
+	http.Handle("/auth/testToken", corsHandler.Handler(http.HandlerFunc(controllers.TestToken)))
+	http.Handle("/data/food-menu/", corsHandler.Handler(http.HandlerFunc(controllers.FoodMenuByHandler)))
+	http.Handle("/data/daily-schedule/image", corsHandler.Handler(http.HandlerFunc(controllers.ScheduleImageHandler)))
+	http.Handle("/data/daily-schedule/", corsHandler.Handler(http.HandlerFunc(controllers.ScheduleHandler)))
+	http.Handle("/data/lost-and-found/", corsHandler.Handler(http.HandlerFunc(controllers.LostAndFoundHandler)))
+	http.Handle("/data/sports/", corsHandler.Handler(http.HandlerFunc(controllers.SportsHandler)))
+	http.Handle("/data/games/", corsHandler.Handler(http.HandlerFunc(controllers.GamesHandler)))
+	http.Handle("/data/school-store/", corsHandler.Handler(http.HandlerFunc(controllers.SchoolStoreHandler)))
+
+	// Start the server with your handlers
 	http.ListenAndServe(":8082", nil)
-	//fmt.Println(databaseControllers.GetUserByEmail("johnsmith@example.com"))
 }

@@ -2,6 +2,18 @@ package restTypes
 
 import "server/databaseTypes"
 
+// DailySchedule represents the data structure for the DailySchedule table
+type DailySchedule struct {
+	ID          int64  `json:"id" example:"1"`                           // Unique identifier for the schedule
+	Title       string `json:"title" example:"New event"`                // Title of the event
+	Description string `json:"description" example:"asdasd"`             // Description of the event
+	Start       string `json:"start" example:"2023-08-07T04:30:00.000Z"` // Start date and time of the event (in ISO 8601 format)
+	End         string `json:"end" example:"2023-08-07T07:00:00.000Z"`   // End date and time of the event (in ISO 8601 format)
+	Status      string `json:"status" example:"busy"`                    // Status of the event (e.g., "busy" or "free")
+	Color       string `json:"color" example:"rgba(220,114,114,0.6)"`    // Color representation of the event
+	Location    string `json:"location" example:"sadsadad"`              // Location of the event
+}
+
 // LoginRequest represents the request body for the login API.
 type LoginRequest struct {
 	// User's email or username.
