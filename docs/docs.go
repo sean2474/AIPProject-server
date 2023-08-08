@@ -137,34 +137,42 @@ const docTemplate = `{
             }
         },
         "/data/daily-schedule/": {
-            "get": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Updates the daily schedule event based on the ID and date provided in the JSON",
                 "consumes": [
-                    "*/*"
+                    "application/json"
                 ],
                 "produces": [
-                    "text/html"
+                    "application/json"
                 ],
                 "tags": [
-                    "DailySchedule"
+                    "Event"
                 ],
-                "summary": "Get the daily schedule HTML template for the specified date or the current date",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "The date for which to retrieve the daily schedule in the format 'YYYY-MM-DD'. If not provided, the current date is used.",
-                        "name": "date",
-                        "in": "query"
+                        "description": "Updated Daily Schedule data",
+                        "name": "schedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/restTypes.Event"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/restTypes.LoginResponse"
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "type": "string"
                         }
@@ -189,24 +197,25 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Uploads the daily schedule image for the current date to the database",
+                "description": "Uploads the daily schedule event",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "DailySchedule"
+                    "Event"
                 ],
-                "summary": "Upload the daily schedule image for the current date",
                 "parameters": [
                     {
-                        "type": "file",
-                        "description": "The daily schedule image file",
-                        "name": "image",
-                        "in": "formData",
-                        "required": true
+                        "description": "Daily Schedule data to update",
+                        "name": "schedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/restTypes.Event"
+                        }
                     }
                 ],
                 "responses": {
@@ -222,8 +231,99 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Deletes the daily schedule event based on the ID and date provided in the JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Event"
+                ],
+                "parameters": [
+                    {
+                        "description": "Data to delete an event from the daily schedule",
+                        "name": "schedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/restTypes.Event"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/restTypes.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/data/daily-schedule/events": {
+            "get": {
+                "description": "Retrieves all events for the specified date",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Event"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Date of events to retrieve (in the format 'YYYY-MM-DD')",
+                        "name": "date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/restTypes.GetEventsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "type": "string"
                         }
@@ -246,7 +346,7 @@ const docTemplate = `{
                     "image/*"
                 ],
                 "tags": [
-                    "DailySchedule"
+                    "Event"
                 ],
                 "summary": "Get the image file for the daily schedule of the specified date or the current date",
                 "parameters": [
@@ -298,7 +398,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "DailySchedule"
+                    "Event"
                 ],
                 "parameters": [
                     {
@@ -354,7 +454,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "DailySchedule"
+                    "Event"
                 ],
                 "parameters": [
                     {
@@ -362,115 +462,6 @@ const docTemplate = `{
                         "description": "The date for which to delete the daily schedule image in the format 'YYYY-MM-DD'. If not provided, the current date is used.",
                         "name": "date",
                         "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/restTypes.LoginResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/data/daily-schedule/{date}": {
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Updates the daily schedule image for a specific date in the database",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "DailySchedule"
-                ],
-                "summary": "Update the daily schedule for a specific date",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The date of the daily schedule to update (in YYYY-MM-DD format)",
-                        "name": "date",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "The updated image file for the daily schedule (limit: 32 MB)",
-                        "name": "image",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/restTypes.LoginResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Deletes the daily schedule for a specific date from the database",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "DailySchedule"
-                ],
-                "summary": "Delete the daily schedule for a specific date",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The date of the daily schedule to delete (in YYYY-MM-DD format)",
-                        "name": "date",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -1718,6 +1709,62 @@ const docTemplate = `{
                 "message": {
                     "description": "Error message.\n\nExample: Invalid request\n\nRequired: true",
                     "type": "string"
+                }
+            }
+        },
+        "restTypes.Event": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "description": "Color representation of the event",
+                    "type": "string",
+                    "example": "rgba(220,114,114,0.6)"
+                },
+                "description": {
+                    "description": "Description of the event",
+                    "type": "string",
+                    "example": "asdasd"
+                },
+                "end": {
+                    "description": "End date and time of the event (in ISO 8601 format)",
+                    "type": "string",
+                    "example": "2023-08-07T07:00:00.000Z"
+                },
+                "id": {
+                    "description": "Unique identifier for the schedule",
+                    "type": "string",
+                    "example": "1"
+                },
+                "location": {
+                    "description": "Location of the event",
+                    "type": "string",
+                    "example": "sadsadad"
+                },
+                "start": {
+                    "description": "Start date and time of the event (in ISO 8601 format)",
+                    "type": "string",
+                    "example": "2023-08-07T04:30:00.000Z"
+                },
+                "status": {
+                    "description": "Status of the event (e.g., \"busy\" or \"free\")",
+                    "type": "string",
+                    "example": "busy"
+                },
+                "title": {
+                    "description": "Title of the event",
+                    "type": "string",
+                    "example": "New event"
+                }
+            }
+        },
+        "restTypes.GetEventsResponse": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/restTypes.Event"
+                    }
                 }
             }
         },

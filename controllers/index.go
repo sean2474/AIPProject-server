@@ -202,9 +202,9 @@ func ScheduleHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		dailySchedule.DeleteDailySchedule(w, r)
 		break
-	//case "GET":
-	//	dailySchedule.GetDailySchedule(w, r)
-	//	break
+	case "GET":
+		dailySchedule.GetEventsByDate(w, r)
+		break
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return

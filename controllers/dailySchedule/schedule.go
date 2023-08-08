@@ -11,24 +11,26 @@ import (
 )
 
 // PostDailySchedule @Summary Upload the daily schedule image for the current date
-// @Description Uploads the daily schedule image for the current date to the database
-// @Tags DailySchedule
-// @Accept multipart/form-data
+// @Description Uploads the daily schedule event
+// @Tags Event
+// @Accept json
 // @Produce json
 // @Security Bearer
-// @Param image formData file true "The daily schedule image file"
+// @Param schedule body restTypes.Event true "Daily Schedule data to update"
 // @Success 201 {object} restTypes.LoginResponse
 // @Failure 400 {string} Bad Request
 // @Failure 500 {string} Internal Server Error
 // @Router /data/daily-schedule/ [post]
 func PostDailySchedule(w http.ResponseWriter, r *http.Request) {
 	// Parse the JSON data from the request body
-	var schedule restTypes.DailySchedule
+	var schedule restTypes.Event
 	err := json.NewDecoder(r.Body).Decode(&schedule)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+
+	// Validate the schedule data
 
 	db, err := sql.Open("sqlite3", "database.db")
 	if err != nil {
@@ -51,46 +53,163 @@ func PostDailySchedule(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	// Write the response
-	response := struct {
-		Status  string `json:"status"`
-		Message string `json:"message"`
-	}{
+	response := restTypes.LoginResponse{
 		Status:  "success",
 		Message: "Daily schedule uploaded successfully",
 	}
 	json.NewEncoder(w).Encode(response)
 }
 
-// PutDailySchedule @Summary Update the daily schedule
-// @Description Updates the daily schedule with the provided data
-// @Tags DailySchedule
+// PutDailySchedule @Summary Update an event in the daily schedule for a given ID and date
+// @Description Updates the daily schedule event based on the ID and date provided in the JSON
+// @Tags Event
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path int true "Daily Schedule ID to update"
-// @Param schedule body DailySchedule true "Daily Schedule data to update"
+// @Param schedule body restTypes.Event  true "Updated Daily Schedule data"
 // @Success 200 {object} restTypes.LoginResponse
 // @Failure 400 {string} Bad Request
+// @Failure 404 {string} Not Found
 // @Failure 500 {string} Internal Server Error
-// @Router /data/daily-schedule/{id} [put]
+// @Router /data/daily-schedule/ [put]
 func PutDailySchedule(w http.ResponseWriter, r *http.Request) {
-	// Function body for PUT request
+	// Parse the JSON data from the request body
+	var schedule restTypes.Event
+	err := json.NewDecoder(r.Body).Decode(&schedule)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	// Extract the id and date from the Start time in the JSON data
+	id := schedule.ID
+	date := schedule.Start.Format("2006-01-02") // Format the date as "YYYY-MM-DD"
+
+	db, err := sql.Open("sqlite3", "database.db")
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Fatal(err)
+		return
+	}
+	defer db.Close()
+
+	// Check if the event exists in the database for the given ID and date
+	query := "SELECT COUNT(*) FROM events WHERE id=? AND DATE(start)=?"
+	var count int
+	err = db.QueryRow(query, id, date).Scan(&count)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if count == 0 {
+		// Event not found for the given ID and date
+		http.Error(w, "Event not found", http.StatusNotFound)
+		return
+	}
+
+	// Update the event data in the database
+	query = "UPDATE events SET title=?, description=?, start=?, end=?, status=?, color=?, location=? WHERE id=? AND DATE(start)=?"
+	_, err = db.Exec(query, schedule.Title, schedule.Description, schedule.Start, schedule.End, schedule.Status, schedule.Color, schedule.Location, id, date)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the response headers
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+
+	// Write the response
+	response := restTypes.LoginResponse{
+		Status:  "success",
+		Message: "Daily schedule updated successfully",
+	}
+	json.NewEncoder(w).Encode(response)
 }
 
-// DeleteDailySchedule @Summary Delete the daily schedule
-// @Description Deletes the daily schedule with the provided ID
-// @Tags DailySchedule
+// DeleteDailySchedule @Summary Delete an event from the daily schedule for a given ID and date
+// @Description Deletes the daily schedule event based on the ID and date provided in the JSON
+// @Tags Event
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path int true "Daily Schedule ID to delete"
+// @Param schedule body restTypes.Event  true "Data to delete an event from the daily schedule"
 // @Success 200 {object} restTypes.LoginResponse
 // @Failure 400 {string} Bad Request
+// @Failure 404 {string} Not Found
 // @Failure 500 {string} Internal Server Error
-// @Router /data/daily-schedule/{id} [delete]
+// @Router /data/daily-schedule/ [delete]
 func DeleteDailySchedule(w http.ResponseWriter, r *http.Request) {
-	var schedule restTypes.DailySchedule
+	// Parse the JSON data from the request body
+	var schedule restTypes.Event
 	err := json.NewDecoder(r.Body).Decode(&schedule)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	// Extract the id and date from the Start time in the JSON data
+	id := schedule.ID
+	date := schedule.Start.Format("2006-01-02") // Format the date as "YYYY-MM-DD"
+
+	db, err := sql.Open("sqlite3", "database.db")
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Fatal(err)
+		return
+	}
+	defer db.Close()
+
+	// Check if the event exists in the database for the given ID and date
+	query := "SELECT COUNT(*) FROM events WHERE id=? AND DATE(start)=?"
+	var count int
+	err = db.QueryRow(query, id, date).Scan(&count)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if count == 0 {
+		// Event not found for the given ID and date
+		http.Error(w, "Event not found", http.StatusNotFound)
+		return
+	}
+
+	// Delete the event from the database
+	query = "DELETE FROM events WHERE id=? AND DATE(start)=?"
+	_, err = db.Exec(query, id, date)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the response headers
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+
+	// Write the response
+	response := restTypes.LoginResponse{
+		Status:  "success",
+		Message: "Daily schedule deleted successfully",
+	}
+	json.NewEncoder(w).Encode(response)
+}
+
+// GetEventsByDate @Summary Get all events for a given date
+// @Description Retrieves all events for the specified date
+// @Tags Event
+// @Accept json
+// @Produce json
+// @Param date query string true "Date of events to retrieve (in the format 'YYYY-MM-DD')"
+// @Success 200 {object} restTypes.GetEventsResponse
+// @Failure 400 {string} Bad Request
+// @Failure 500 {string} Internal Server Error
+// @Router /data/daily-schedule/events [get]
+func GetEventsByDate(w http.ResponseWriter, r *http.Request) {
+	// Parse the date query parameter from the URL
+	dateStr := r.URL.Query().Get("date")
+	date, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
@@ -104,12 +223,27 @@ func DeleteDailySchedule(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	// Delete the schedule data from the database
-	query := "DELETE FROM DailySchedule WHERE id=?"
-	_, err = db.Exec(query, schedule.ID)
+	// Query all events for the specified date
+	query := "SELECT id, title, description, start, end, status, color, location FROM events WHERE DATE(start)=?"
+	rows, err := db.Query(query, date.Format("2006-01-02"))
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Fatal(err)
 		return
+	}
+	defer rows.Close()
+
+	// Collect the events into a slice
+	var events []restTypes.Event
+	for rows.Next() {
+		var event restTypes.Event
+		err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.Start, &event.End, &event.Status, &event.Color, &event.Location)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			log.Fatal(err)
+			return
+		}
+		events = append(events, event)
 	}
 
 	// Set the response headers
@@ -117,19 +251,20 @@ func DeleteDailySchedule(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	// Write the response
-	response := restTypes.DeleteResponse{
-		Status:  "success",
-		Message: "Daily schedule deleted successfully",
+	response := restTypes.GetEventsResponse{
+		Events: events,
 	}
 	json.NewEncoder(w).Encode(response)
 }
+
+///////////////DAILY IMAGE PART
 
 // GetDailyImage returns the image file for the daily schedule of the specified date or the current date.
 //
 // Retrieves the image file for the daily schedule of the specified date or the current date from the database.
 //
 // @Summary Get the image file for the daily schedule of the specified date or the current date
-// @Tags DailySchedule
+// @Tags Event
 // @Accept  */*
 // @Produce  image/*
 // @Param date query string false "The date for which to retrieve the daily schedule image in the format 'YYYY-MM-DD'. If not provided, the current date is used."
@@ -183,7 +318,7 @@ func GetDailyImage(w http.ResponseWriter, r *http.Request) {
 
 // PostDailyImage @Summary Upload the daily schedule image for a specific date
 // @Description Uploads the daily schedule image for the provided date to the database
-// @Tags DailySchedule
+// @Tags Event
 // @Accept  multipart/form-data
 // @Produce  json
 // @Security Bearer
@@ -272,7 +407,7 @@ func PostDailyImage(w http.ResponseWriter, r *http.Request) {
 
 // DeleteDailyImage @Summary Delete the daily schedule image for a specific date
 // @Description Deletes the daily schedule image for a specific date from the database
-// @Tags DailySchedule
+// @Tags Event
 // @Produce  json
 // @Security Bearer
 // @Param date query string false "The date for which to delete the daily schedule image in the format 'YYYY-MM-DD'. If not provided, the current date is used."

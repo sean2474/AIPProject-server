@@ -184,6 +184,48 @@ definitions:
           Required: true
         type: string
     type: object
+  restTypes.Event:
+    properties:
+      color:
+        description: Color representation of the event
+        example: rgba(220,114,114,0.6)
+        type: string
+      description:
+        description: Description of the event
+        example: asdasd
+        type: string
+      end:
+        description: End date and time of the event (in ISO 8601 format)
+        example: "2023-08-07T07:00:00.000Z"
+        type: string
+      id:
+        description: Unique identifier for the schedule
+        example: "1"
+        type: string
+      location:
+        description: Location of the event
+        example: sadsadad
+        type: string
+      start:
+        description: Start date and time of the event (in ISO 8601 format)
+        example: "2023-08-07T04:30:00.000Z"
+        type: string
+      status:
+        description: Status of the event (e.g., "busy" or "free")
+        example: busy
+        type: string
+      title:
+        description: Title of the event
+        example: New event
+        type: string
+    type: object
+  restTypes.GetEventsResponse:
+    properties:
+      events:
+        items:
+          $ref: '#/definitions/restTypes.Event'
+        type: array
+    type: object
   restTypes.LoginRequest:
     properties:
       password:
@@ -372,24 +414,27 @@ paths:
       tags:
       - Authentication
   /data/daily-schedule/:
-    get:
+    delete:
       consumes:
-      - '*/*'
+      - application/json
+      description: Deletes the daily schedule event based on the ID and date provided
+        in the JSON
       parameters:
-      - description: The date for which to retrieve the daily schedule in the format
-          'YYYY-MM-DD'. If not provided, the current date is used.
-        in: query
-        name: date
-        type: string
+      - description: Data to delete an event from the daily schedule
+        in: body
+        name: schedule
+        required: true
+        schema:
+          $ref: '#/definitions/restTypes.Event'
       produces:
-      - text/html
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
-        "401":
-          description: Unauthorized
+            $ref: '#/definitions/restTypes.LoginResponse'
+        "400":
+          description: Bad Request
           schema:
             type: string
         "404":
@@ -400,20 +445,21 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Get the daily schedule HTML template for the specified date or the
-        current date
+      security:
+      - Bearer: []
       tags:
-      - DailySchedule
+      - Event
     post:
       consumes:
-      - multipart/form-data
-      description: Uploads the daily schedule image for the current date to the database
+      - application/json
+      description: Uploads the daily schedule event
       parameters:
-      - description: The daily schedule image file
-        in: formData
-        name: image
+      - description: Daily Schedule data to update
+        in: body
+        name: schedule
         required: true
-        type: file
+        schema:
+          $ref: '#/definitions/restTypes.Event'
       produces:
       - application/json
       responses:
@@ -425,65 +471,26 @@ paths:
           description: Bad Request
           schema:
             type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
         "500":
           description: Internal Server Error
           schema:
             type: string
       security:
       - Bearer: []
-      summary: Upload the daily schedule image for the current date
       tags:
-      - DailySchedule
-  /data/daily-schedule/{date}:
-    delete:
-      description: Deletes the daily schedule for a specific date from the database
-      parameters:
-      - description: The date of the daily schedule to delete (in YYYY-MM-DD format)
-        in: path
-        name: date
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/restTypes.LoginResponse'
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      security:
-      - Bearer: []
-      summary: Delete the daily schedule for a specific date
-      tags:
-      - DailySchedule
+      - Event
     put:
-      description: Updates the daily schedule image for a specific date in the database
+      consumes:
+      - application/json
+      description: Updates the daily schedule event based on the ID and date provided
+        in the JSON
       parameters:
-      - description: The date of the daily schedule to update (in YYYY-MM-DD format)
-        in: path
-        name: date
+      - description: Updated Daily Schedule data
+        in: body
+        name: schedule
         required: true
-        type: string
-      - description: 'The updated image file for the daily schedule (limit: 32 MB)'
-        in: formData
-        name: image
-        required: true
-        type: file
+        schema:
+          $ref: '#/definitions/restTypes.Event'
       produces:
       - application/json
       responses:
@@ -495,8 +502,8 @@ paths:
           description: Bad Request
           schema:
             type: string
-        "401":
-          description: Unauthorized
+        "404":
+          description: Not Found
           schema:
             type: string
         "500":
@@ -505,9 +512,36 @@ paths:
             type: string
       security:
       - Bearer: []
-      summary: Update the daily schedule for a specific date
       tags:
-      - DailySchedule
+      - Event
+  /data/daily-schedule/events:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all events for the specified date
+      parameters:
+      - description: Date of events to retrieve (in the format 'YYYY-MM-DD')
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restTypes.GetEventsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - Event
   /data/daily-schedule/image:
     delete:
       description: Deletes the daily schedule image for a specific date from the database
@@ -539,7 +573,7 @@ paths:
       security:
       - Bearer: []
       tags:
-      - DailySchedule
+      - Event
     get:
       consumes:
       - '*/*'
@@ -571,7 +605,7 @@ paths:
       summary: Get the image file for the daily schedule of the specified date or
         the current date
       tags:
-      - DailySchedule
+      - Event
     post:
       consumes:
       - multipart/form-data
@@ -609,7 +643,7 @@ paths:
       security:
       - Bearer: []
       tags:
-      - DailySchedule
+      - Event
   /data/food-menu/:
     get:
       consumes:
