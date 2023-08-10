@@ -30,7 +30,8 @@ func main() {
 	// Apply the cors handler to your existing handlers
 	http.Handle("/swagger/", corsHandler.Handler(httpSwagger.WrapHandler))
 	http.Handle("/auth/login", corsHandler.Handler(http.HandlerFunc(controllers.LoginHandler)))
-	http.Handle("/auth/testToken", corsHandler.Handler(http.HandlerFunc(controllers.TestToken)))
+	//http.Handle("/auth/testToken", corsHandler.Handler(http.HandlerFunc(controllers.TestToken)))
+	//http.Handle("/auth/testToken", corsHandler.Handler(http.HandlerFunc(controllers.SchoolStoreHandler)))
 	http.Handle("/data/food-menu/", corsHandler.Handler(http.HandlerFunc(controllers.FoodMenuByHandler)))
 	http.Handle("/data/daily-schedule/image", corsHandler.Handler(http.HandlerFunc(controllers.ScheduleImageHandler)))
 	http.Handle("/data/daily-schedule/", corsHandler.Handler(http.HandlerFunc(controllers.ScheduleHandler)))
