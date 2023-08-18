@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig host="ec2-35-169-229-180.compute-1.amazonaws.com" id="0f49cd88-1b9b-4bfe-93d4-4d0b7f15a1e8" keyPath="C:\Users\senya\Downloads\AIPServer (1).pem" port="22" nameFormat="DESCRIPTIVE" username="ubuntu" useOpenSSHConfig="true" />
+    </configs>
+  </component>
+</project>
