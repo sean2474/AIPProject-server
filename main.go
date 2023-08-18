@@ -39,6 +39,11 @@ func main() {
 	http.Handle("/data/sports/", corsHandler.Handler(http.HandlerFunc(controllers.SportsHandler)))
 	http.Handle("/data/games/", corsHandler.Handler(http.HandlerFunc(controllers.GamesHandler)))
 	http.Handle("/data/school-store/", corsHandler.Handler(http.HandlerFunc(controllers.SchoolStoreHandler)))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "build/index.html")
+	})
+	fs := http.FileServer(http.Dir("build/static/"))
+	http.Handle("/static/", http.StripPrefix("/static", fs))
 
 	// Start the server with your handlers
 	http.ListenAndServe(":8082", nil)
